@@ -1,4 +1,4 @@
-module Mustache
+module TMustache.Parser
 
 import TParsec
 import TParsec.NEList

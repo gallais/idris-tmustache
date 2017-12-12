@@ -1,0 +1,7 @@
+package TMustache
+
+sourcedir = src
+modules = TMustache.Parser
+
+opts = "--total -p contrib -p TParsec"
+
