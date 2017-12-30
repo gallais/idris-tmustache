@@ -1,7 +1,12 @@
 package TMustache
 
 sourcedir = src
-modules = TMustache.Parser
 
-opts = "--total -p contrib -p TParsec"
+modules = TMustache.Parser
+        , TMustache.Data.Map
+        , TMustache.Data.Set
+
+pkgs = contrib, tparsec
+
+opts = "--total"
 
