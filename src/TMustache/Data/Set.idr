@@ -11,6 +11,10 @@ implementation Semigroup () where _ <+> _ = ()
 data Set : (key : Type) -> (ltR : key -> key -> Type) -> Type where
   MkSet : Map key ltR (\ _ => ()) -> Set key ltR
 
+elem : TotalStrictOrder ltR =>
+       (k : key) -> Set key ltR -> Bool
+elem k (MkSet s) = isJust $ Map.lookup k s
+
 empty : Set key ltR
 empty = MkSet Map.empty
 

@@ -12,6 +12,10 @@ data Map : (key : Type) ->
            (val : key -> Type) -> Type where
   MkMap : Tree ltR val MInf PInf n -> Map key ltR val
 
+lookup : TotalStrictOrder ltR =>
+         (k : key) -> Map key ltR val -> Maybe (val k)
+lookup k (MkMap t) = map getValue $ Tree.lookup k LTMInfLift LTLiftPInf t
+
 empty : Map key ltR val
 empty = MkMap (Leaf LTMInfPInf)
 
