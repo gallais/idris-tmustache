@@ -2,7 +2,8 @@ module TMustache.Parser
 
 import TParsec
 import TParsec.NEList
-import Data.SortedSet
+import TMustache.Data.Set as Set
+import TMustache.Relation.Order.Instances
 
 %default total
 
@@ -44,19 +45,19 @@ tokenize = go [] . unpack where
   go acc (        '}' :: '}' :: cs) = RDCBRACE :: string acc (go [] cs)
   go acc (c :: cs)                  = go (c :: acc) cs
 
-data Mustache : SortedSet String -> Type where
-  Nothing : Mustache SortedSet.empty
-  PHolder : (tag : String) -> Mustache s -> Mustache (insert tag s)
+data Mustache : Set StringLT -> Type where
+  Nothing : Mustache Set.empty
+  PHolder : (tag : String) -> Mustache s -> Mustache (Set.insert tag s)
   Content : String -> Mustache s -> Mustache s
 
 ExMustache : Type
-ExMustache = (s : SortedSet String ** Mustache s)
+ExMustache = (s : Set StringLT ** Mustache s)
 
 DExMustache : Type
 DExMustache = ExMustache -> ExMustache
 
 toExMustache : DExMustache -> ExMustache
-toExMustache f = f (empty ** Nothing)
+toExMustache f = f (Set.empty ** Nothing)
 
 MustacheParser : Type -> Nat -> Type
 MustacheParser = Parser (SizedList Tok) Tok Maybe
@@ -73,8 +74,8 @@ tag = between (exact LDCBRACE) (exact RDCBRACE) aSTRING
 
 block : All (MustacheParser DExMustache)
 block =
-  alt (map (\ s, (set ** mstch) => (insert s set ** PHolder s mstch)) tag)
-      (map (\ s, (set ** mstch) => (set          ** Content s mstch)) aSTRING)
+  alt (map (\ s, (set ** mstch) => (Set.insert s set ** PHolder s mstch)) tag)
+      (map (\ s, (set ** mstch) => (set              ** Content s mstch)) aSTRING)
 
 mustache : All (MustacheParser ExMustache)
 mustache = map (toExMustache . NEList.foldr1 (.)) $ nelist block
