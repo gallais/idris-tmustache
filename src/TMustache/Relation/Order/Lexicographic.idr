@@ -28,9 +28,9 @@ implementation TotalStrictOrder ltR => TotalStrictOrder (LexicoLT ltR) where
   trichotomy []        (_ :: _)  = LT NilConsLT
   trichotomy (_ :: _)  []        = GT NilConsLT
   trichotomy (x :: xs) (y :: ys) with (the (Trichotomy ltR x y) (trichotomy x y))
-    trichotomy (x :: xs) (y :: ys) | LT ltxy = LT (HeadLT ltxy)
-    trichotomy (x :: xs) (y :: ys) | GT ltyx = GT (HeadLT ltyx)
-    trichotomy (x :: xs) (x :: ys) | EQ Refl with (the (Trichotomy (LexicoLT ltR) xs ys) (trichotomy xs ys))
-      | LT ltxsys = LT (TailLT ltxsys)
-      | EQ eqxsys = EQ (cong eqxsys)
-      | GT ltysxs = GT (TailLT ltysxs)
+    | LT ltxy = LT (HeadLT ltxy)
+    | GT ltyx = GT (HeadLT ltyx)
+    | EQ eqxy with (the (Trichotomy (LexicoLT ltR) xs ys) (trichotomy xs ys))
+      | LT ltxsys = LT (rewrite eqxy in TailLT ltxsys)
+      | EQ eqxsys = EQ (rewrite eqxy in cong eqxsys)
+      | GT ltysxs = GT (rewrite eqxy in TailLT ltysxs)
