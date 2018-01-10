@@ -8,14 +8,11 @@ import TMustache.Relation.Order.Nat
 %default total
 %access public export
 
-charToNat : Char -> Nat
-charToNat = toNat
-
 CharLT : Char -> Char -> Type
-CharLT = OnLT NatLT charToNat
+CharLT = OnLT NatLT
 
-[charToNatInj] Injective Char.charToNat where
+implementation Injection Char Nat where
 
-  injective = p
-    where postulate p : charToNat x = charToNat y -> x = y
+  injection = toNat
+  injective = p where postulate p : {x, y : Char} -> toNat x = toNat y -> x = y
 

@@ -1,7 +1,5 @@
 module TMustache.Relation.Order.String
 
-import Prelude.Strings as PS
-
 import TMustache.Function.Injective
 import TMustache.Relation.Order
 import TMustache.Relation.Order.On
@@ -12,9 +10,10 @@ import TMustache.Relation.Order.Lexicographic
 %access public export
 
 StringLT : String -> String -> Type
-StringLT = OnLT (LexicoLT CharLT) PS.unpack
+StringLT = OnLT (LexicoLT CharLT)
 
-[unpackInj] Injective PS.unpack where
+implementation Injection String (List Char) where
 
-  injective = p where postulate p : unpack str = unpack str' -> str = str'
+  injection = unpack
+  injective = p where postulate p : unpack x = unpack y -> x = y
 

@@ -6,19 +6,19 @@ import TMustache.Relation.Order
 %default total
 %access public export
 
-data OnLT : (ltR : b -> b -> Type) -> (f : a -> b) -> a -> a -> Type where
-  MkOnLT : ltR (f x) (f y) -> OnLT ltR f x y
+data OnLT : (ltR : b -> b -> Type) -> a -> a -> Type where
+  MkOnLT : {x, y : a} -> Injection a b => ltR (injection x) (injection y) -> OnLT ltR x y
 
-implementation StrictOrder ltR => StrictOrder (OnLT ltR f) where
+implementation StrictOrder ltR => StrictOrder (OnLT ltR) where
 
   irreflexive (MkOnLT p) = irreflexive p
 
   transitive (MkOnLT p) (MkOnLT q) = MkOnLT (transitive p q)
 
-implementation (TotalStrictOrder ltR, Injective fn) =>
-               TotalStrictOrder (OnLT ltR fn) where
+implementation (TotalStrictOrder ltR, Injection a b) =>
+               TotalStrictOrder (OnLT {a} {b} ltR) where
 
-  trichotomy x y with (the (Trichotomy ltR (fn x) (fn y)) (trichotomy (fn x) (fn y)))
+  trichotomy x y with (trichotomy {lt = ltR} (injection x) (injection y))
     | LT ltfxfy = LT (MkOnLT ltfxfy)
     | EQ eqfxfy = EQ (injective eqfxfy)
     | GT ltfyfx = GT (MkOnLT ltfyfx)

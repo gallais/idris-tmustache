@@ -3,6 +3,7 @@ module TMustache.Function.Injective
 %default total
 %access public export
 
-interface Injective (f : a -> b) where
+interface Injection a b | a where
+  injection : a -> b
+  injective : injection x = injection y -> x = y
 
-  injective : f x = f y -> x = y
