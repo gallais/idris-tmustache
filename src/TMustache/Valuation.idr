@@ -1,7 +1,6 @@
 module TMustache.Valuation
 
 import Data.So
-import TMustache.Function.Injective
 import TMustache.Relation.Order.Instances
 import TMustache.Data.Set as Set
 
@@ -12,11 +11,8 @@ infix 10 :=
 data Assignment : String -> Type where
   (:=) : (s, v : String) -> Assignment s
 
-Index : Type
-Index = Set String StringLT
-
 infixr 7 ::
-data Valuation : Index -> Type where
+data Valuation : Set StringLT -> Type where
   Nil  : Valuation Set.empty
   (::) : Assignment s -> Valuation (Set.delete s set) -> Valuation set
 
