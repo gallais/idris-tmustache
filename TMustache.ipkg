@@ -11,7 +11,12 @@ modules = TMustache.Relation.Order
         , TMustache.Relation.Order.Instances
         , TMustache.Function.Injective
         , TMustache.Data.TwoThree.Key
-        , TMustache.Data.TwoThree.Tree.Internal
+        , TMustache.Data.TwoThree.Tree
+        , TMustache.Data.TwoThree.Tree.Type
+        , TMustache.Data.TwoThree.Tree.Base
+        , TMustache.Data.TwoThree.Tree.Path
+        , TMustache.Data.TwoThree.Tree.Insert
+        , TMustache.Data.TwoThree.Tree.Delete
         , TMustache.Data.Map
         , TMustache.Data.Set
         , TMustache.Parser
