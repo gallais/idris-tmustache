@@ -1,6 +1,7 @@
 module TMustache.Parser
 
 import TParsec
+import TParsec.SizedDict
 import TParsec.NEList
 
 import TMustache.Data.Set as Set
@@ -45,8 +46,8 @@ tokenize = go [] . unpack where
   go acc ('\\' :: '\\' :: cs)       = go ('\\' :: acc) cs
   go acc ('\\' :: '{' :: '{' :: cs) = go ('{' :: '{' :: acc) cs
   go acc ('\\' :: '}' :: '}' :: cs) = go ('}' :: '}' :: acc) cs
-  go acc (        '{' :: '{' :: cs) = LDCBRACE :: string acc (go [] cs)
-  go acc (        '}' :: '}' :: cs) = RDCBRACE :: string acc (go [] cs)
+  go acc (        '{' :: '{' :: cs) = string acc $ LDCBRACE :: go [] cs
+  go acc (        '}' :: '}' :: cs) = string acc $ RDCBRACE :: go [] cs
   go acc (c :: cs)                  = go (c :: acc) cs
 
 DExMustache : Type
@@ -75,3 +76,8 @@ block =
 
 mustache : All (MustacheParser ExMustache)
 mustache = map (toExMustache . NEList.foldr1 (.)) $ nelist block
+
+parseMustache : String -> Maybe ExMustache
+parseMustache str = do
+  res <- runParser mustache lteRefl $ MkSizedType MkSizedDict (tokenize str) Refl
+  (const $ Value res) <$> guard (Size res == Z)
