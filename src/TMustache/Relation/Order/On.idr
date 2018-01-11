@@ -18,7 +18,7 @@ implementation StrictOrder ltR => StrictOrder (OnLT ltR) where
 implementation (TotalStrictOrder ltR, Injection a b) =>
                TotalStrictOrder (OnLT {a} {b} ltR) where
 
-  trichotomy x y with (trichotomy {lt = ltR} (injection x) (injection y))
+  trichotomy x y with (compareBy ltR (injection x) (injection y))
     | LT ltfxfy = LT (MkOnLT ltfxfy)
     | EQ eqfxfy = EQ (injective eqfxfy)
     | GT ltfyfx = GT (MkOnLT ltfyfx)
