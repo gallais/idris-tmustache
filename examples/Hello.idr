@@ -8,18 +8,12 @@ import TMustache.Provider
 
 import Prelude.Providers
 
+%default total
+
 %language TypeProviders
 %provide (must : ExMustache) with tmustache "Hello.mst"
 
-%default total
-
-index : Set StringLT
-index = DPair.fst must
-
-valuation : Valuation Hello.index
-valuation = "name" := "World" :: []
-
 main : IO ()
 main = do
-  putStrLn $ semantics must ?a -- ("name" := "World" :: [])
---  putStrLn $ semantics must $ "world" := "Name" :: []
+  putStrLn $ semantics must $ "name" := "World" :: []
+--  putStrLn $ semantics must $ "world" := "Name" :: Nil -- rejected

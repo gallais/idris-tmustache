@@ -9,6 +9,7 @@ modules = TMustache.Relation.Order
         , TMustache.Relation.Order.Lexicographic
         , TMustache.Relation.Order.String
         , TMustache.Relation.Order.Instances
+        , TMustache.Function.Injective
         , TMustache.Data.TwoThree.Key
         , TMustache.Data.TwoThree.Tree.Internal
         , TMustache.Data.Map
