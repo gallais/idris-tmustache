@@ -33,14 +33,14 @@ lookup : TotalStrictOrder ltR =>
          (k : key) -> ExtendLT ltR l (Lift k) -> ExtendLT ltR (Lift k) u ->
          (t : Tree ltR val l u n) -> Maybe (Idx t k)
 lookup {ltR} {n = Z}    k lk ku (Leaf _) = Nothing
-lookup {ltR} {n = S n'} k lk ku (Node2 k' v' l r) with (the (Trichotomy ltR k k') (trichotomy k k'))
+lookup {ltR} {n = S n'} k lk ku (Node2 k' v' l r) with (compareBy ltR k k')
   | LT kk' = map (mapIdx Node2Left) $ lookup k lk (LTLift kk') l
-  lookup k lk ku (Node2 k v' l r) | EQ Refl = Just (MkIdx v' Node2Here)
+  | EQ kk' = Just (rewrite kk' in MkIdx v' Node2Here)
   | GT k'k = map (mapIdx Node2Right) $ lookup k (LTLift k'k) ku r
-lookup {ltR} {n = S n'} k lk ku (Node3 k1 v1 k2 v2 l m r) with (the (Trichotomy ltR k k1) (trichotomy k k1))
+lookup {ltR} {n = S n'} k lk ku (Node3 k1 v1 k2 v2 l m r) with (compareBy ltR k k1)
   | LT kk1 = map (mapIdx Node3Left) $ lookup k lk (LTLift kk1) l
-  lookup k lk ku (Node3 k v1 k2 v2 l m r) | EQ Refl = Just (MkIdx v1 Node3Here1)
-  | GT k1k with (the (Trichotomy ltR k k2) (trichotomy k k2))
+  | EQ kk1 = Just (rewrite kk1 in MkIdx v1 Node3Here1)
+  | GT k1k with (compareBy ltR k k2)
     | LT kk2 = map (mapIdx Node3Middle) $ lookup k (LTLift k1k) (LTLift kk2) m
-    lookup k lk ku (Node3 k1 v1 k v2 l m r) | GT k1k | EQ Refl = Just (MkIdx v2 Node3Here2)
+    | EQ kk2 = Just (rewrite kk2 in MkIdx v2 Node3Here2)
     | GT k2k = map (mapIdx Node3Right) $ lookup k (LTLift k2k) ku r

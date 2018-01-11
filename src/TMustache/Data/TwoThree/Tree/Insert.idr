@@ -14,7 +14,7 @@ insert : TotalStrictOrder ltR =>
          ExtendLT ltR l (Lift k) -> ExtendLT ltR (Lift k) u ->
          Tree ltR val l u n -> MayFit ltR val l u n
 insert k v lk ku (Leaf _) = TooBig k v (Leaf lk) (Leaf ku)
-insert k v lk ku (Node2 k1 v1 l r) with (the (Trichotomy ltR k k1) (trichotomy k k1))
+insert k v lk ku (Node2 k1 v1 l r) with (compareBy ltR k k1)
   | EQ kk1 = ItFits (Node2 k ((rewrite kk1 in v1) <+> v) (rewrite kk1 in l) (rewrite kk1 in r))
   | LT kk1  with (insert k v lk (LTLift kk1) l)
     | ItFits t           = ItFits (Node2 k1 v1 t r)
@@ -22,12 +22,12 @@ insert k v lk ku (Node2 k1 v1 l r) with (the (Trichotomy ltR k k1) (trichotomy k
   | GT k1k  with (insert k v (LTLift k1k) ku r)
     | ItFits t           = ItFits (Node2 k1 v1 l t)
     | TooBig k' v' rl rr = ItFits (Node3 k1 v1 k' v' l rl rr)
-insert k v lk ku (Node3 k1 v1 k2 v2 l m r) with (the (Trichotomy ltR k k1) (trichotomy k k1))
+insert k v lk ku (Node3 k1 v1 k2 v2 l m r) with (compareBy ltR k k1)
   | EQ kk1 = ItFits (Node3 k ((rewrite kk1 in v1) <+> v) k2 v2 (rewrite kk1 in l) (rewrite kk1 in m) r)
   | LT kk1 with (insert k v lk (LTLift kk1) l)
      | ItFits t           = ItFits (Node3 k1 v1 k2 v2 t m r)
      | TooBig k' v' ll lr = TooBig k1 v1 (Node2 k' v' ll lr) (Node2 k2 v2 m r)
-  | GT k1k with (the (Trichotomy ltR k k2) (trichotomy k k2))
+  | GT k1k with (compareBy ltR k k2)
      | EQ kk2 = ItFits (Node3 k1 v1 k ((rewrite kk2 in v2) <+> v) l (rewrite kk2 in m) (rewrite kk2 in r))
      | LT kk2 with (insert k v (LTLift k1k) (LTLift kk2) m)
        | ItFits t           = ItFits (Node3 k1 v1 k2 v2 l t r)
