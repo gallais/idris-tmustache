@@ -2,9 +2,21 @@ package TMustache
 
 sourcedir = src
 
-modules = TMustache.Parser
+modules = TMustache.Relation.Order
+        , TMustache.Relation.Order.On
+        , TMustache.Relation.Order.Nat
+        , TMustache.Relation.Order.Char
+        , TMustache.Relation.Order.Lexicographic
+        , TMustache.Relation.Order.String
+        , TMustache.Relation.Order.Instances
+        , TMustache.Data.TwoThree.Key
+        , TMustache.Data.TwoThree.Tree.Internal
         , TMustache.Data.Map
         , TMustache.Data.Set
+        , TMustache.Parser
+        , TMustache.Valuation
+        , TMustache.TMustache
+        , TMustache.Provider
 
 pkgs = contrib, tparsec
 
