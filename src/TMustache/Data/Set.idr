@@ -1,7 +1,7 @@
 module TMustache.Data.Set
 
 import TMustache.Relation.Order
-import TMustache.Data.Map as Map
+import public TMustache.Data.Map as Map
 
 %default total
 %access public export

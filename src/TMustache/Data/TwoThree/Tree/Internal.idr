@@ -1,6 +1,6 @@
 module TMustache.Data.TwoThree.Tree.Internal
 
-import TMustache.Data.TwoThree.Key
+import public TMustache.Data.TwoThree.Key
 import TMustache.Relation.Order
 
 %default total

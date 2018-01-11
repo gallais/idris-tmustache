@@ -1,8 +1,7 @@
 module TMustache.Data.Map
 
 import TMustache.Relation.Order
-import TMustache.Data.TwoThree.Key
-import TMustache.Data.TwoThree.Tree.Internal as Tree
+import public TMustache.Data.TwoThree.Tree.Internal as Tree
 
 %default total
 %access public export

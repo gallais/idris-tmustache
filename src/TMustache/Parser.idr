@@ -2,10 +2,14 @@ module TMustache.Parser
 
 import TParsec
 import TParsec.NEList
+
 import TMustache.Data.Set as Set
 import TMustache.Relation.Order.Instances
 
+import TMustache.TMustache
+
 %default total
+%access public export
 
 data Tok : Type where
   LDCBRACE : Tok            -- Left  Double Curly Braces
@@ -44,14 +48,6 @@ tokenize = go [] . unpack where
   go acc (        '{' :: '{' :: cs) = LDCBRACE :: string acc (go [] cs)
   go acc (        '}' :: '}' :: cs) = RDCBRACE :: string acc (go [] cs)
   go acc (c :: cs)                  = go (c :: acc) cs
-
-data Mustache : Set StringLT -> Type where
-  Nothing : Mustache Set.empty
-  PHolder : (tag : String) -> Mustache s -> Mustache (Set.insert tag s)
-  Content : String -> Mustache s -> Mustache s
-
-ExMustache : Type
-ExMustache = (s : Set StringLT ** Mustache s)
 
 DExMustache : Type
 DExMustache = ExMustache -> ExMustache
