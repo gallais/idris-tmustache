@@ -17,6 +17,7 @@ modules = TMustache.Relation.Order
         , TMustache.Data.TwoThree.Tree.Path
         , TMustache.Data.TwoThree.Tree.Insert
         , TMustache.Data.TwoThree.Tree.Delete
+        , TMustache.Data.DMap
         , TMustache.Data.Map
         , TMustache.Data.Set
         , TMustache.Parser

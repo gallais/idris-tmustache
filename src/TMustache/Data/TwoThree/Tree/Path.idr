@@ -19,15 +19,15 @@ data Path : Tree ltR val l u n -> (k : key) -> val k -> Type where
   Node3Right  : Path r k v -> Path (Node3 k1 v1 k2 v2 l m r) k v
 
 data Idx : Tree ltR val l u n -> key -> Type where
-  MkIdx : {val : key -> Type} -> (v : val k) -> Path t k v -> Idx t k
+  MkIdx : {val : key -> Type} -> k = k' -> (v : val k') -> Path t k' v -> Idx t k
 
 getValue : {t : Tree ltR val l u n} -> Idx t k -> val k
-getValue (MkIdx v _) = v
+getValue (MkIdx eq v _) = rewrite eq in v
 
 mapIdx : {t : Tree ltR val l u m} -> {t' : Tree ltR val l' u' m'} ->
          (f : {k : key} -> {v : val k} -> Path t k v -> Path t' k v) ->
          Idx t k -> Idx t' k
-mapIdx f (MkIdx v p) = MkIdx v (f p)
+mapIdx f (MkIdx eq v p) = MkIdx eq v (f p)
 
 lookup : TotalStrictOrder ltR =>
          (k : key) -> ExtendLT ltR l (Lift k) -> ExtendLT ltR (Lift k) u ->
@@ -35,12 +35,13 @@ lookup : TotalStrictOrder ltR =>
 lookup {ltR} {n = Z}    k lk ku (Leaf _) = Nothing
 lookup {ltR} {n = S n'} k lk ku (Node2 k' v' l r) with (compareBy ltR k k')
   | LT kk' = map (mapIdx Node2Left) $ lookup k lk (LTLift kk') l
-  | EQ kk' = Just (rewrite kk' in MkIdx v' Node2Here)
+  | EQ kk' = Just (MkIdx kk' v' Node2Here)
   | GT k'k = map (mapIdx Node2Right) $ lookup k (LTLift k'k) ku r
 lookup {ltR} {n = S n'} k lk ku (Node3 k1 v1 k2 v2 l m r) with (compareBy ltR k k1)
   | LT kk1 = map (mapIdx Node3Left) $ lookup k lk (LTLift kk1) l
-  | EQ kk1 = Just (rewrite kk1 in MkIdx v1 Node3Here1)
+  | EQ kk1 = Just (MkIdx kk1 v1 Node3Here1)
   | GT k1k with (compareBy ltR k k2)
     | LT kk2 = map (mapIdx Node3Middle) $ lookup k (LTLift k1k) (LTLift kk2) m
-    | EQ kk2 = Just (rewrite kk2 in MkIdx v2 Node3Here2)
+    | EQ kk2 = Just (MkIdx kk2 v2 Node3Here2)
     | GT k2k = map (mapIdx Node3Right) $ lookup k (LTLift k2k) ku r
+

@@ -7,7 +7,7 @@ import public TMustache.Data.Map as Map
 %access public export
 
 data Set : (ltR : key -> key -> Type) -> Type where
-  MkSet : Map ltR (\ _ => ()) -> Set ltR
+  MkSet : Map ltR () -> Set ltR
 
 elem : TotalStrictOrder ltR =>
        (k : key) -> Set {key} ltR -> Bool
