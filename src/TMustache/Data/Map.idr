@@ -18,7 +18,7 @@ empty : Map ltR val
 empty = MkMap (Leaf LTMInfPInf)
 
 update : TotalStrictOrder ltR =>
-         (k : key) -> (Maybe (val k) -> val k) ->
+         (k : key) -> ({k' : key} -> k = k' -> Maybe (val k') -> val k') ->
          Map ltR val -> Map ltR val
 update k f (MkMap t) = case update k f LTMInfLift LTLiftPInf t of
   ItFits t'          => MkMap t'
@@ -27,11 +27,13 @@ update k f (MkMap t) = case update k f LTMInfLift LTLiftPInf t of
 insert : TotalStrictOrder ltR =>
          (k : key) -> Semigroup (val k) =>
          val k -> Map ltR val -> Map ltR val
-insert k v = update k (maybe v (<+> v))
+insert k vk = Map.update k $ \ eq, mvk1 => case mvk1 of
+  Nothing  => rewrite sym eq in vk
+  Just vk1 => rewrite sym eq in (rewrite eq in vk1) <+> vk
 
 override : TotalStrictOrder ltR =>
            (k : key) -> val k -> Map ltR val -> Map ltR val
-override k v = update k (const v)
+override k v = Map.update k (\ eq, _ => rewrite sym eq in v)
 
 -- Based on @override@ i.e. assuming all keys are distinct
 fromList : TotalStrictOrder ltR => List (k : key ** val k) -> Map ltR val
