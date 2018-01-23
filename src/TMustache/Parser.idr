@@ -4,9 +4,13 @@ import TParsec
 import TParsec.SizedDict
 import TParsec.NEList
 
-import TMustache.Data.Set as Set
+import TMustache.Data.Map as Map
 import TMustache.Relation.Order.Instances
 
+import TMustache.Data.Star
+import TMustache.Data.DiffExists
+
+import TMustache.Valuation
 import TMustache.TMustache
 
 %default total
@@ -50,12 +54,6 @@ tokenize = go [] . unpack where
   go acc (        '}' :: '}' :: cs) = string acc $ RDCBRACE :: go [] cs
   go acc (c :: cs)                  = go (c :: acc) cs
 
-DExMustache : Type
-DExMustache = ExMustache -> ExMustache
-
-toExMustache : DExMustache -> ExMustache
-toExMustache f = f (Set.empty ** Nothing)
-
 MustacheParser : Type -> Nat -> Type
 MustacheParser = Parser (SizedList Tok) Tok Maybe
 
@@ -66,16 +64,37 @@ isSTRING _          = Nothing
 aSTRING : All (MustacheParser String)
 aSTRING = guardM isSTRING anyTok
 
-tag : All (MustacheParser String)
-tag = between (exact LDCBRACE) (exact RDCBRACE) aSTRING
+ExMustacheBlock : Type
+ExMustacheBlock = DiffExists (Map StringLT MkType) MustacheBlock
 
-block : All (MustacheParser DExMustache)
-block =
-  alt (map (\ s, (set ** mstch) => (Set.insert s set ** PHolder s mstch)) tag)
-      (map (\ s, (set ** mstch) => (set              ** Content s mstch)) aSTRING)
+pCond : String -> ExMustache -> ExMustacheBlock
+pCond label (MkDiffExists f p) =
+  let diff = override label MkBool in
+  MkDiffExists (f . diff) (\ i => PCond label (p (diff i)))
+
+pHolder : String -> ExMustacheBlock
+pHolder label = MkDiffExists (override label MkString) (\ i => PHolder label)
+
+content : String -> ExMustacheBlock
+content str = MkDiffExists (\ i => i) (\ i => Content str)
+
+mustacheBlock : All (Box (MustacheParser ExMustache) :-> MustacheParser ExMustacheBlock)
+mustacheBlock rec = alt (map content aSTRING) $
+  rand (exact LDCBRACE) $ bind aSTRING $ \ str =>
+  case the (List Char) (unpack str) of
+    _           => cmap (pHolder str) $ exact RDCBRACE
+    '#' :: rest => let label = pack rest in
+      Combinators.map (pCond label) $ land (rand (exact RDCBRACE) rec)
+                                    $ and (exact LDCBRACE)
+                                    $ land (exact (STRING ("/" <+> label)))
+                                    $ exact RDCBRACE
+
+empty : ExMustache
+empty = MkDiffExists (\ i => i) (\ i => [])
 
 mustache : All (MustacheParser ExMustache)
-mustache = map (toExMustache . NEList.foldr1 (.)) $ nelist block
+mustache = fix _ $ \ rec =>
+  Combinators.map (foldr (combine (::)) empty) $ nelist (mustacheBlock rec)
 
 parseMustache : String -> Maybe ExMustache
 parseMustache str = do

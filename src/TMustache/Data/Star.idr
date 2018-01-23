@@ -11,3 +11,8 @@ data Star : (t : a -> a -> Type) -> a -> a -> Type where
 map : ({a, b : idx} -> t a b -> u a b) -> Star t a b -> Star u a b
 map f []          = []
 map f (st :: sts) = f st :: map f sts
+
+
+trans : Star t a b -> Star t b c -> Star t a c
+trans []        ys = ys
+trans (t :: ts) ys = t :: trans ts ys
