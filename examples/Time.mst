@@ -1,0 +1,1 @@
+{{hours}}:{{minutes}}{{#am}}am{{/am}}{{#pm}}pm{{/pm}}
