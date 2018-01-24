@@ -3,7 +3,6 @@ module TMustache.Data.TwoThree.Tree.Delete
 import TMustache.Relation.Order
 
 import TMustache.Data.TwoThree.Key
-import TMustache.Data.TwoThree.Tree.Type
 import TMustache.Data.TwoThree.Tree.Base
 
 %default total
