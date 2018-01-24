@@ -53,7 +53,7 @@ tokenize = go [] . unpack where
   go acc (c :: cs)          = go (c :: acc) cs
 
 MustacheParser : Type -> Nat -> Type
-MustacheParser = Parser (SizedList Tok) Tok Maybe
+MustacheParser = Parser (SizedList Tok) Tok List
 
 isSTRING : Tok -> Maybe String
 isSTRING (STRING s) = Just s
@@ -95,6 +95,8 @@ mustache = fix _ $ \ rec =>
   Combinators.map (foldr (combine (::)) empty) $ nelist (mustacheBlock rec)
 
 parseMustache : String -> Maybe ExMustache
-parseMustache str = do
-  res <- runParser mustache lteRefl $ MkSizedType MkSizedDict (tokenize str) Refl
-  (const $ Value res) <$> guard (Size res == Z)
+parseMustache str =
+  let res = runParser mustache lteRefl $ MkSizedType MkSizedDict (tokenize str) Refl in
+  case filter (\ r => Size r == Z) res of
+    r :: _ => Just (Value r)
+    _      => Nothing
