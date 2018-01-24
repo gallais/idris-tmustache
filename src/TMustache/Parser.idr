@@ -46,13 +46,11 @@ tokenize = go [] . unpack where
   string cs ts = STRING (pack $ List.reverse cs) :: ts
 
   go : List Char -> List Char -> List Tok
-  go acc []                         = string acc []
-  go acc ('\\' :: '\\' :: cs)       = go ('\\' :: acc) cs
-  go acc ('\\' :: '{' :: '{' :: cs) = go ('{' :: '{' :: acc) cs
-  go acc ('\\' :: '}' :: '}' :: cs) = go ('}' :: '}' :: acc) cs
-  go acc (        '{' :: '{' :: cs) = string acc $ LDCBRACE :: go [] cs
-  go acc (        '}' :: '}' :: cs) = string acc $ RDCBRACE :: go [] cs
-  go acc (c :: cs)                  = go (c :: acc) cs
+  go acc []                 = string acc []
+  go acc ('\\' :: c :: cs)  = go (c :: acc) cs
+  go acc ('{' :: '{' :: cs) = string acc $ LDCBRACE :: go [] cs
+  go acc ('}' :: '}' :: cs) = string acc $ RDCBRACE :: go [] cs
+  go acc (c :: cs)          = go (c :: acc) cs
 
 MustacheParser : Type -> Nat -> Type
 MustacheParser = Parser (SizedList Tok) Tok Maybe
@@ -81,13 +79,13 @@ content str = MkDiffExists (\ i => i) (\ i => Content str)
 mustacheBlock : All (Box (MustacheParser ExMustache) :-> MustacheParser ExMustacheBlock)
 mustacheBlock rec = alt (map content aSTRING) $
   rand (exact LDCBRACE) $ bind aSTRING $ \ str =>
-  case the (List Char) (unpack str) of
-    _           => cmap (pHolder str) $ exact RDCBRACE
+  case unpack str of
     '#' :: rest => let label = pack rest in
       Combinators.map (pCond label) $ land (rand (exact RDCBRACE) rec)
                                     $ and (exact LDCBRACE)
                                     $ land (exact (STRING ("/" <+> label)))
                                     $ exact RDCBRACE
+    _           => cmap (pHolder str) $ exact RDCBRACE
 
 empty : ExMustache
 empty = MkDiffExists (\ i => i) (\ i => [])
