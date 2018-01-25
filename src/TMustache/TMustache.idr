@@ -10,48 +10,49 @@ import TMustache.Valuation
 %default total
 %access public export
 
+Scope : Type
+Scope = Map StringLT MkType
+
 mutual
 
-  data MustacheBlock : Map StringLT MkType -> Map StringLT MkType -> Type where
+  data MustacheBlock : Scope -> Scope -> Type where
     -- placeholder to be replaced by content
     PHolder : (tag : String) -> MustacheBlock s (override tag MkString s)
     -- block conditionned by the boolean value associated to PCond
-    PCond   : (tag : String) -> Mustache (override tag MkBool s) t -> MustacheBlock s t
+    IfCond  : (tag : String) -> Mustache (override tag MkBool s) t -> MustacheBlock s t
+    -- foreach block conditioned by the list associated to PForEach
+    ForEach : (tag : String) -> (t : Scope) -> Mustache Map.empty t -> MustacheBlock s (override tag (MkList t) s)
     -- simple string content
     Content : String -> MustacheBlock s s
 
-  Mustache : Map StringLT MkType -> Map StringLT MkType -> Type
+  Mustache : Scope -> Scope -> Type
   Mustache = Star MustacheBlock
 
 ExMustache : Type
-ExMustache = DiffExists (Map StringLT MkType) Mustache
+ExMustache = DiffExists Scope Mustache
 
 semantics : (m : ExMustache) -> Valuation (index m Map.empty) -> String
-semantics (MkDiffExists dmp must) vs = unsafeSems (must Map.empty) where
-
-  mp : Map StringLT MkType
-  mp = dmp Map.empty
+semantics (MkDiffExists dmp must) vs = unsafeSems vs (must Map.empty) where
 
   -- can't be bothered to maintain the invariant that the template
   -- and the valuation range over the same set. Happy with knowing
   -- that this is the case when calling `semantics` and that safety
   -- holds as a meta-result
 
-  unsafeVal : (tag : String) -> Lazy String -> String
-  unsafeVal tag str with (Map.lookup tag mp, value tag vs)
-    | (Nothing, _)             = "IMPOSSIBLE"
-    | (_, Nothing)             = "IMPOSSIBLE"
-    | (Just mk, Just (_ := v)) = case mk of
-      MkString => believe_me v
-      MkBool   => if believe_me v then str else ""
+  unsafeVal : (a : Type) -> (tag : String) -> Valuation t -> a
+  unsafeVal a tag vs = case value tag vs of
+    Nothing       => believe_me "IMPOSSIBLE"
+    Just (_ := v) => believe_me v
 
   mutual
 
-    unsafeSems : Mustache s t -> String
-    unsafeSems [] = ""
-    unsafeSems (t :: ts) = unsafeSem t <+> unsafeSems ts
+    unsafeSems : Valuation t -> Mustache s t -> String
+    unsafeSems vs [] = ""
+    unsafeSems vs (b :: bs) = unsafeSem (believe_me vs) b <+> unsafeSems (believe_me vs) bs
 
-    unsafeSem : MustacheBlock s t -> String
-    unsafeSem (Content str) = str
-    unsafeSem (PCond tag m) = unsafeVal tag (unsafeSems m)
-    unsafeSem (PHolder tag) = unsafeVal tag ""
+    unsafeSem : Valuation t -> MustacheBlock s t -> String
+    unsafeSem vs (Content str)     = str
+    unsafeSem vs (IfCond tag m)    = if (unsafeVal Bool tag vs) then unsafeSems (believe_me vs) m else ""
+    unsafeSem vs (PHolder tag)     = unsafeVal String tag vs
+    unsafeSem vs (ForEach tag t m) = concatMap (\ vs => unsafeSems (believe_me vs) m)
+                                   $ unsafeVal (List (Valuation t)) tag vs

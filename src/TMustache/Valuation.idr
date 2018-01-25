@@ -1,6 +1,5 @@
 module TMustache.Valuation
 
-import Data.So
 import TMustache.Relation.Order
 import TMustache.Relation.Order.Instances
 import TMustache.Data.Map as Map
@@ -11,22 +10,27 @@ import TMustache.Data.Map as Map
 data MkType =
     MkString
   | MkBool
+  | MkList (Map StringLT MkType)
 
-mkType : MkType -> Type
-mkType MkString = String
-mkType MkBool   = Bool
+mkTypeM : Maybe Type -> Type
+mkTypeM = maybe Void (\ t => t)
 
-mkTypeM : Maybe MkType -> Type
-mkTypeM = maybe Void mkType
+mutual
 
-infix 10 :=
-data Assignment : String -> Map StringLT MkType -> Type where
-  (:=) : (k : String) -> Valuation.mkTypeM (lookup k m) -> Assignment k m
+  mkType : MkType -> Type
+  mkType (MkList s) = List (Valuation s)
+  mkType MkString   = String
+  mkType MkBool     = Bool
 
-infixr 7 ::
-data Valuation : Map StringLT MkType -> Type where
-  Nil  : Valuation map
-  (::) : Assignment k m -> Valuation (Map.delete k m) -> Valuation m
+
+  infix 10 :=
+  data Assignment : String -> Map StringLT MkType -> Type where
+    (:=) : (k : String) -> Valuation.mkTypeM (map Valuation.mkType $ lookup k m) -> Assignment k m
+
+  infixr 7 ::
+  data Valuation : Map StringLT MkType -> Type where
+    Nil  : Valuation map
+    (::) : Assignment k m -> Valuation (Map.delete k m) -> Valuation m
 
 -- Notice that in theory it should be possible to write a function of type:
 -- value : (tag : String) -> Valuation s -> So (lookup tag s) -> Assignment tag s
@@ -39,8 +43,11 @@ value tag ((k := v) :: vs) = case compareBy StringLT tag k of
 
 
 private
-test : Valuation (Map.fromList [("x", MkString), ("y", MkBool)])
-test = "y" := True
-    :: "x" := "This is x!"
+test : let m = Map.fromList [("x", MkString), ("y", MkBool)]
+      in Valuation (Map.fromList [("e", MkString), ("xys", MkList m)])
+test = "e"   := "This is e!"
+    :: "xys" := [ ("y" := True :: "x" := "This is x!" :: [])
+                , ("x" := "This is not x!" :: "y" := False :: [])
+                ]
     :: []
 

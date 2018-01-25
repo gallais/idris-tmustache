@@ -66,13 +66,19 @@ aSTRING = guardM isSTRING anyTok
 ExMustacheBlock : Type
 ExMustacheBlock = DiffExists (Map StringLT MkType) MustacheBlock
 
-pCond : String -> ExMustache -> ExMustacheBlock
-pCond label (MkDiffExists f p) =
-  let diff = override label MkBool in
-  MkDiffExists (f . diff) (\ i => PCond label (p (diff i)))
-
 pHolder : String -> ExMustacheBlock
 pHolder label = MkDiffExists (override label MkString) (\ i => PHolder label)
+
+ifCond : String -> ExMustache -> ExMustacheBlock
+ifCond label (MkDiffExists f p) =
+  let diff = override label MkBool in
+  MkDiffExists (f . diff) (\ i => IfCond label (p (diff i)))
+
+forEach : String -> ExMustache -> ExMustacheBlock
+forEach label (MkDiffExists f p) =
+  let t = f Map.empty in
+  let diff = override label (MkList t) in
+  MkDiffExists diff (\ i => ForEach label t (p Map.empty))
 
 content : String -> ExMustacheBlock
 content str = MkDiffExists (\ i => i) (\ i => Content str)
@@ -82,10 +88,15 @@ mustacheBlock rec = alt (map content aSTRING) $
   rand (exact LDCBRACE) $ bind aSTRING $ \ str =>
   case unpack str of
     '#' :: rest => let label = pack rest in
-      Combinators.map (pCond label) $ land (rand (exact RDCBRACE) rec)
-                                    $ and (exact LDCBRACE)
-                                    $ land (exact (STRING ("/" <+> label)))
-                                    $ exact RDCBRACE
+      Combinators.map (ifCond label) $ land (rand (exact RDCBRACE) rec)
+                                     $ and (exact LDCBRACE)
+                                     $ land (exact (STRING ("/" <+> label)))
+                                     $ exact RDCBRACE
+    '*' :: rest => let label = pack rest in
+      Combinators.map (forEach label) $ land (rand (exact RDCBRACE) rec)
+                                      $ and (exact LDCBRACE)
+                                      $ land (exact (STRING ("/" <+> label)))
+                                      $ exact RDCBRACE
     _           => cmap (pHolder str) $ exact RDCBRACE
 
 empty : ExMustache
