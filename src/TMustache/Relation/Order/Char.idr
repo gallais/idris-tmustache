@@ -14,5 +14,7 @@ CharLT = OnLT NatLT
 implementation Injection Char Nat where
 
   injection = toNat
-  injective = p where postulate p : {x, y : Char} -> toNat x = toNat y -> x = y
+  injective {x} {y} eq = aux (toNat x) (toNat y) x y eq where
 
+    aux : (x, y : Nat) -> (c, d : Char) -> x = y -> c = d
+    aux x x c d Refl = believe_me (the (c = c) Refl)

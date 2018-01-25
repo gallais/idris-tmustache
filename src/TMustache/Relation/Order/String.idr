@@ -15,5 +15,7 @@ StringLT = OnLT (LexicoLT CharLT)
 implementation Injection String (List Char) where
 
   injection = unpack
-  injective = p where postulate p : unpack x = unpack y -> x = y
+  injective {x} {y} eq = aux (unpack x) (unpack y) x y eq where
 
+    aux : (x, y : List Char) -> (c, d : String) -> x = y -> c = d
+    aux x x c d Refl = believe_me (the (c = c) Refl)
