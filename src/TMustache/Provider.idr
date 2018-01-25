@@ -13,6 +13,11 @@ import Prelude.Providers
 %default total
 %access public export
 
+rawFile : String -> IO (Provider String)
+rawFile fp = do
+  Right raw <- readFile fp | Left err => pure (Error (show err))
+  pure $ Provide raw
+
 tmustache : String -> IO (Provider ExMustache)
 tmustache fp = do
   Right raw <- readFile fp | Left err => pure (Error (show err))
