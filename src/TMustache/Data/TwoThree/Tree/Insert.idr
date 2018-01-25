@@ -3,7 +3,7 @@ module TMustache.Data.TwoThree.Tree.Insert
 import TMustache.Relation.Order
 
 import TMustache.Data.TwoThree.Key
-import TMustache.Data.TwoThree.Tree.Base
+import TMustache.Data.TwoThree.Tree.Type
 
 %default total
 %access public export

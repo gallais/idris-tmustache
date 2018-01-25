@@ -15,6 +15,7 @@ modules = TMustache.Relation.Order
         , TMustache.Data.LazyList
         , TMustache.Data.TwoThree.Key
         , TMustache.Data.TwoThree.Tree
+        , TMustache.Data.TwoThree.Tree.Type
         , TMustache.Data.TwoThree.Tree.Base
         , TMustache.Data.TwoThree.Tree.Path
         , TMustache.Data.TwoThree.Tree.Insert
