@@ -9,6 +9,7 @@ import TMustache.Relation.Order.Instances
 
 import TMustache.Data.Star
 import TMustache.Data.DiffExists
+import TMustache.Data.LazyList
 
 import TMustache.Valuation
 import TMustache.TMustache
@@ -53,7 +54,7 @@ tokenize = go [] . unpack where
   go acc (c :: cs)          = go (c :: acc) cs
 
 MustacheParser : Type -> Nat -> Type
-MustacheParser = Parser (SizedList Tok) Tok List
+MustacheParser = Parser (SizedList Tok) Tok LazyList
 
 isSTRING : Tok -> Maybe String
 isSTRING (STRING s) = Just s

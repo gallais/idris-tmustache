@@ -12,6 +12,7 @@ modules = TMustache.Relation.Order
         , TMustache.Function.Injective
         , TMustache.Data.Star
         , TMustache.Data.DiffExists
+        , TMustache.Data.LazyList
         , TMustache.Data.TwoThree.Key
         , TMustache.Data.TwoThree.Tree
         , TMustache.Data.TwoThree.Tree.Base
